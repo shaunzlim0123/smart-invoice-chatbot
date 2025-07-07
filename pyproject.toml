@@ -1,0 +1,29 @@
+[project]
+name = "smartfund-chatbot"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Shaun Lim",email = "shaunzlim0123@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "langchain (>=0.3.26,<0.4.0)",
+    "langgraph (>=0.5.1,<0.6.0)",
+    "langchainhub (>=0.1.21,<0.2.0)",
+    "langchain-community (>=0.3.27,<0.4.0)",
+    "chromadb (>=1.0.15,<2.0.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)",
+    "black (>=25.1.0,<26.0.0)",
+    "isort (>=6.0.1,<7.0.0)",
+    "pytest (>=8.4.1,<9.0.0)",
+    "langchain-chroma (>=0.2.4,<0.3.0)",
+    "langchain-openai (>=0.3.27,<0.4.0)",
+    "pypdf (>=5.7.0,<6.0.0)",
+    "streamlit (>=1.46.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
