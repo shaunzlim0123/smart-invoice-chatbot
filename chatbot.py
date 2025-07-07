@@ -55,10 +55,25 @@ def create_sources_string(documents) -> str:
     
     return sources_string
 
-def handle_follow_up_click(question):
-    """Handle follow-up question button click"""
-    # Process the follow-up question immediately
-    st.session_state.process_follow_up = question
+def process_followup_question(question: str):
+    """Process a follow-up question and add it to the chat"""
+    # Add user message
+    st.session_state.messages.append({"role": "user", "content": question})
+    
+    # Get bot response
+    with st.spinner("Thinking..."):
+        response = st.session_state.chatbot.run_query(question)
+    
+    # Create sources string
+    sources_str = create_sources_string(response["source_documents"])
+    
+    # Add assistant message to history
+    st.session_state.messages.append({
+        "role": "assistant", 
+        "content": response["result"],
+        "follow_up": response["follow_up_questions"],
+        "sources": sources_str
+    })
 
 # Streamlit UI
 def main():
@@ -70,8 +85,6 @@ def main():
         st.session_state.chatbot = RAGChatbot()
     if "messages" not in st.session_state:
         st.session_state.messages = []
-    if "process_follow_up" not in st.session_state:
-        st.session_state.process_follow_up = None
     
     # Display chat messages
     for idx, message in enumerate(st.session_state.messages):
@@ -86,93 +99,30 @@ def main():
             # Show clickable follow-up questions
             if message["role"] == "assistant" and "follow_up" in message and message["follow_up"]:
                 st.markdown("**💡 Suggested follow-up questions:**")
-                follow_up_container = st.container()
-                with follow_up_container:
-                    # Parse follow-up questions
-                    questions = message["follow_up"].split('\n')
-                    cols = st.columns(1)  # Single column for questions
-                    
-                    for q_idx, question in enumerate(questions):
-                        if question.strip():
-                            # Clean the question (remove numbering)
-                            clean_q = question.strip()
-                            if clean_q and len(clean_q) > 2:
-                                if clean_q[0].isdigit() and clean_q[1:3] in ['. ', '- ', ') ']:
-                                    clean_q = clean_q[3:].strip()
-                                elif clean_q[0].isdigit() and clean_q[1] in ['.', '-', ')']:
-                                    clean_q = clean_q[2:].strip()
-                            
-                            if clean_q:  # Only create button if question is not empty
-                                if cols[0].button(
-                                    f"❓ {clean_q}",
-                                    key=f"follow_up_{idx}_{q_idx}",
-                                    use_container_width=True
-                                ):
-                                    st.session_state.process_follow_up = clean_q
-                                    st.rerun()
+                
+                # Parse follow-up questions
+                questions = message["follow_up"].split('\n')
+                
+                for q_idx, question in enumerate(questions):
+                    if question.strip():
+                        # Clean the question (remove numbering)
+                        clean_q = question.strip()
+                        if clean_q and len(clean_q) > 2:
+                            if clean_q[0].isdigit() and clean_q[1:3] in ['. ', '- ', ') ']:
+                                clean_q = clean_q[3:].strip()
+                            elif clean_q[0].isdigit() and clean_q[1] in ['.', '-', ')']:
+                                clean_q = clean_q[2:].strip()
+                        
+                        if clean_q:  # Only create button if question is not empty
+                            if st.button(
+                                f"❓ {clean_q}",
+                                key=f"follow_up_{idx}_{q_idx}",
+                                use_container_width=True
+                            ):
+                                process_followup_question(clean_q)
+                                st.rerun()
     
-    # Process follow-up question if one was clicked
-    if st.session_state.process_follow_up:
-        prompt = st.session_state.process_follow_up
-        st.session_state.process_follow_up = None
-        
-        # Display user message
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
-        
-        # Get bot response
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                response = st.session_state.chatbot.run_query(prompt)
-            
-            st.markdown(response["result"])
-            
-            # Create sources string
-            sources_str = create_sources_string(response["source_documents"])
-            
-            # Show source documents if available
-            if sources_str:
-                with st.expander("📚 View Sources"):
-                    st.markdown(sources_str)
-            
-            # Show clickable follow-up questions immediately
-            if response["follow_up_questions"]:
-                st.markdown("**💡 Suggested follow-up questions:**")
-                follow_up_container = st.container()
-                with follow_up_container:
-                    questions = response["follow_up_questions"].split('\n')
-                    cols = st.columns(1)
-                    
-                    current_msg_idx = len(st.session_state.messages)
-                    for q_idx, question in enumerate(questions):
-                        if question.strip():
-                            # Clean the question
-                            clean_q = question.strip()
-                            if clean_q and len(clean_q) > 2:
-                                if clean_q[0].isdigit() and clean_q[1:3] in ['. ', '- ', ') ']:
-                                    clean_q = clean_q[3:].strip()
-                                elif clean_q[0].isdigit() and clean_q[1] in ['.', '-', ')']:
-                                    clean_q = clean_q[2:].strip()
-                            
-                            if clean_q:
-                                if cols[0].button(
-                                    f"❓ {clean_q}",
-                                    key=f"follow_up_new_{current_msg_idx}_{q_idx}",
-                                    use_container_width=True
-                                ):
-                                    st.session_state.process_follow_up = clean_q
-                                    st.rerun()
-            
-            # Add to message history
-            st.session_state.messages.append({
-                "role": "assistant", 
-                "content": response["result"],
-                "follow_up": response["follow_up_questions"],
-                "sources": sources_str
-            })
-    
-    # Chat input - regular usage without value parameter
+    # Chat input
     prompt = st.chat_input("What would you like to know?")
     
     # Process regular prompt
@@ -200,30 +150,28 @@ def main():
             # Show clickable follow-up questions immediately
             if response["follow_up_questions"]:
                 st.markdown("**💡 Suggested follow-up questions:**")
-                follow_up_container = st.container()
-                with follow_up_container:
-                    questions = response["follow_up_questions"].split('\n')
-                    cols = st.columns(1)
-                    
-                    current_msg_idx = len(st.session_state.messages)
-                    for q_idx, question in enumerate(questions):
-                        if question.strip():
-                            # Clean the question
-                            clean_q = question.strip()
-                            if clean_q and len(clean_q) > 2:
-                                if clean_q[0].isdigit() and clean_q[1:3] in ['. ', '- ', ') ']:
-                                    clean_q = clean_q[3:].strip()
-                                elif clean_q[0].isdigit() and clean_q[1] in ['.', '-', ')']:
-                                    clean_q = clean_q[2:].strip()
-                            
-                            if clean_q:
-                                if cols[0].button(
-                                    f"❓ {clean_q}",
-                                    key=f"follow_up_main_{current_msg_idx}_{q_idx}",
-                                    use_container_width=True
-                                ):
-                                    st.session_state.process_follow_up = clean_q
-                                    st.rerun()
+                
+                questions = response["follow_up_questions"].split('\n')
+                current_msg_idx = len(st.session_state.messages)
+                
+                for q_idx, question in enumerate(questions):
+                    if question.strip():
+                        # Clean the question
+                        clean_q = question.strip()
+                        if clean_q and len(clean_q) > 2:
+                            if clean_q[0].isdigit() and clean_q[1:3] in ['. ', '- ', ') ']:
+                                clean_q = clean_q[3:].strip()
+                            elif clean_q[0].isdigit() and clean_q[1] in ['.', '-', ')']:
+                                clean_q = clean_q[2:].strip()
+                        
+                        if clean_q:
+                            if st.button(
+                                f"❓ {clean_q}",
+                                key=f"follow_up_new_{current_msg_idx}_{q_idx}",
+                                use_container_width=True
+                            ):
+                                process_followup_question(clean_q)
+                                st.rerun()
             
             # Add to message history
             st.session_state.messages.append({
