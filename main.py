@@ -1,16 +1,3 @@
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# from graph.graph import app
-
-# if __name__ == "__main__":
-#     print("Hello Agentic RAG")
-#     result = app.invoke(input={"question": "How do i make pizza?"})
-
-#     print(result["generation"])
-
-
 from dotenv import load_dotenv
 load_dotenv()
 
