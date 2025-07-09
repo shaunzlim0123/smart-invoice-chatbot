@@ -13,9 +13,12 @@ class GradeDocuments(BaseModel):
 
 structured_llm_grader = llm.with_structured_output(GradeDocuments)
 
-system = """ You are a grader assessing relevance of a retrieved document to a user question. \n
-        If the document contains keyword(s) or semantic meaning related to the question, grade it as relevant.
-        Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question.
+system = """You are a grader assessing whether a retrieved document helps answer a user’s question.
+
+- Look for direct matches on key terms and broader semantic connections.
+- Mark 'yes' if the document provides at least partial, concrete support for answering the question.
+- Mark 'no' if it offers no meaningful or on-topic information.
+- Only respond with “yes” or “no”.
 """
 
 grade_prompt = ChatPromptTemplate.from_messages(

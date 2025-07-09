@@ -27,6 +27,7 @@ for pdf_file in pdf_files:
 print(f"Loaded {len(docs)} document pages")
 
 text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+    model_name="gpt-4o-mini",
     chunk_size=1000, 
     chunk_overlap=200
 )
@@ -46,16 +47,10 @@ chroma_retriever = Chroma(
     collection_name="smartfund-rag-chroma",
     persist_directory="./.chroma",
     embedding_function=OpenAIEmbeddings(),
-).as_retriever()
+).as_retriever(
+    search_kwargs={"k": 5}  
+)
 
 chat = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-
-# Create history-aware retriever with your Chroma retriever
-rephrase_prompt = hub.pull("langchain-ai/chat-langchain-rephrase")
-history_aware_retriever = create_history_aware_retriever(
-    llm=chat, 
-    retriever=chroma_retriever,  
-    prompt=rephrase_prompt
-)
 
 print("Retriever loaded successfully")

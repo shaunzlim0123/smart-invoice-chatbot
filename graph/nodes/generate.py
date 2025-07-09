@@ -33,11 +33,14 @@ def generate(state: GraphState) -> dict:
         template=follow_up_template, 
         input_variables=["question", "answer"]
     )
-    follow_up_chain = LLMChain(llm=chat, prompt=follow_up_prompt)
-    follow_up_questions = follow_up_chain.run(
-        question=question, 
-        answer=generation
-    )
+    follow_up_chain = follow_up_prompt | chat
+
+    follow_up_response = follow_up_chain.invoke({
+        "question": question, 
+        "answer": generation
+    })
+
+    follow_up_questions = follow_up_response.content
     
     return {
         "documents": documents, 
