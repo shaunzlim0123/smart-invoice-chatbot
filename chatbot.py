@@ -77,7 +77,7 @@ def process_followup_question(question: str):
 
 # Streamlit UI
 def main():
-    st.title("🤖 Agentic RAG Chatbot")
+    st.title("🤖 Smart Invoice Chatbot")
     st.markdown("Ask me anything! I'll retrieve relevant documents and provide grounded answers.")
     
     # Initialize session state

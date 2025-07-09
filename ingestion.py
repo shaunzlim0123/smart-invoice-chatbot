@@ -27,8 +27,8 @@ for pdf_file in pdf_files:
 print(f"Loaded {len(docs)} document pages")
 
 text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-    chunk_size=500, 
-    chunk_overlap=0
+    chunk_size=1000, 
+    chunk_overlap=200
 )
 
 doc_splits = text_splitter.split_documents(docs)
