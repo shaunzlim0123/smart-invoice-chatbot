@@ -2,13 +2,12 @@ from typing import Any, Dict
 
 from graph.chains.generation import generation_chain
 from graph.state import GraphState
-from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 
 chat = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
-def generate(state: GraphState) -> dict:
+def generate(state: GraphState) -> Dict[str, Any]:
     """
     Generate answer using retrieved documents
     """
