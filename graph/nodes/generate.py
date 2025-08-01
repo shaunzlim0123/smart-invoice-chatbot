@@ -14,13 +14,11 @@ def generate(state: GraphState) -> Dict[str, Any]:
     print("---GENERATE ANSWER---")
     question = state["question"]
     documents = state["documents"]
-    chat_history = state.get("chat_history", [])
     
     # Generate answer with context
     generation = generation_chain.invoke({
         "context": documents, 
-        "question": question,
-        "chat_history": chat_history
+        "question": question
     })
     
     # Generate follow-up questions

@@ -9,3 +9,6 @@ class GraphState(TypedDict):
     generation: str
     documents: List[str]
     follow_up_questions: str
+    chat_history: List[List[str]]
+    original_question: str
+    intent: str

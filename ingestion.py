@@ -48,7 +48,7 @@ chroma_retriever = Chroma(
     persist_directory="./.chroma",
     embedding_function=OpenAIEmbeddings(),
 ).as_retriever(
-    search_kwargs={"k": 5}  
+    search_kwargs={"k": 4}  
 )
 
 chat = ChatOpenAI(model="gpt-4o-mini", temperature=0)

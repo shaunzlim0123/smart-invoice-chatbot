@@ -2,7 +2,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from graph.graph import app
-from langchain_core.messages import HumanMessage, AIMessage
 import streamlit as st
 from typing import Set
 
@@ -12,9 +11,9 @@ class RAGChatbot:
         self.chat_history = []
     
     def add_to_history(self, human_msg: str, ai_msg: str):
-        """Add messages to chat history"""
-        self.chat_history.append(HumanMessage(content=human_msg))
-        self.chat_history.append(AIMessage(content=ai_msg))
+        """Add messages to chat history using tuple format"""
+        self.chat_history.append(("human", human_msg))
+        self.chat_history.append(("ai", ai_msg))
     
     def run_query(self, query: str):
         """Run a query through the LangGraph workflow"""

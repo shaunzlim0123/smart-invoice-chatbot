@@ -5,8 +5,8 @@ from langgraph.graph import END, StateGraph
 
 
 from graph.chains.hallucination_grader import hallucination_grader
-from graph.consts import RETRIEVE, GRADE_DOCUMENTS, GENERATE, GENERATE_FALLBACK
-from graph.nodes import generate, grade_documents, retrieve, generate_fallback
+from graph.consts import RETRIEVE, GRADE_DOCUMENTS, GENERATE, GENERATE_FALLBACK, CLASSIFY_INTENT
+from graph.nodes import generate, grade_documents, retrieve, generate_fallback, classify_intent
 from graph.state import GraphState
     
 def decide_to_generate(state):
@@ -39,12 +39,14 @@ def grade_generation_grounded_in_documents(state: GraphState) -> str:
 
 workflow = StateGraph(GraphState)
 
+workflow.add_node(CLASSIFY_INTENT, classify_intent)
 workflow.add_node(RETRIEVE, retrieve)
 workflow.add_node(GRADE_DOCUMENTS, grade_documents)
 workflow.add_node(GENERATE, generate)
 workflow.add_node(GENERATE_FALLBACK, generate_fallback)
 
-workflow.set_entry_point(RETRIEVE) 
+workflow.set_entry_point(CLASSIFY_INTENT) 
+workflow.add_edge(CLASSIFY_INTENT, RETRIEVE)
 workflow.add_edge(RETRIEVE, GRADE_DOCUMENTS)
 
 workflow.add_conditional_edges(
